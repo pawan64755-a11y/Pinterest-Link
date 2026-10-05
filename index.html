@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Relationship Cues — Pinterest Pin Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@500;600;700;800&family=Bebas+Neue&family=Oswald:wght@500;600;700&family=Montserrat:wght@700;800&family=Playfair+Display:wght@700;800&family=Lora:wght@600;700&family=Caveat:wght@600;700&family=Pacifico&family=League+Spartan:wght@600;700;800&family=Archivo+Black&family=Raleway:wght@700;800&family=DM+Sans:wght@700;800&family=Nunito:wght@700;800&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #121212;
+    font-family: 'Poppins', -apple-system, Roboto, 'Segoe UI', sans-serif;
+    color: #fff;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .wrap {
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    height: 100dvh;
+    margin: 0 auto;
+    padding: 12px;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+  h1 {
+    font-size: 15px;
+    text-align: center;
+    margin: 0 0 8px;
+    font-weight: 600;
+    color: #eee;
+    letter-spacing: 0.5px;
+    flex: 0 0 auto;
+  }
+  .canvas-container {
+    position: relative;
+    flex: 0 0 auto;
+    width: auto;
+    height: 46vh;
+    max-height: 420px;
+    max-width: 100%;
+    aspect-ratio: 2 / 3;
+    margin: 0 auto;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    touch-action: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  }
+  canvas#card {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .placeholder-btn {
+    position: absolute;
+    left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 14px;
+    pointer-events: none;
+    text-align: center;
+    padding: 0 20px;
+  }
+  .divider {
+    position: absolute;
+    left: 0; right: 0;
+    height: 32px;
+    margin-top: -16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: ns-resize;
+    z-index: 5;
+  }
+  .divider .bar {
+    width: 50px;
+    height: 6px;
+    background: #4CAF50;
+    border-radius: 3px;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.35);
+  }
+  .hint {
+    font-size: 12px;
+    color: #777;
+    text-align: center;
+    margin-top: 6px;
+    flex: 0 0 auto;
+  }
+  .controls {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 24px;
+  }
+  .row { display: flex; gap: 10px; }
+  button {
+    flex: 1;
+    background: #2b2b2b;
+    color: #fff;
+    border: 1px solid #3a3a3a;
+    border-radius: 10px;
+    padding: 13px 10px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  button:active { background: #3a3a3a; }
+  button.primary { background: #4CAF50; border-color: #4CAF50; }
+  button.primary:active { background: #43a047; }
+  textarea {
+    width: 100%;
+    background: #1c1c1c;
+    color: #fff;
+    border: 1px solid #3a3a3a;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    resize: none;
+    min-height: 70px;
+  }
+  label.small {
+    font-size: 13px;
+    color: #aaa;
+    display: flex;
+    justify-content: space-between;
+  }
+  input[type=range] { width: 100%; }
+  #fileInput { display: none; }
+
+  .swatchRow {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .fontRow {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+    flex-shrink: 0;
+  }
+  .fontChip {
+    flex: 0 0 auto;
+    background: #1c1c1c;
+    color: #fff;
+    border: 1px solid #3a3a3a;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+  .fontChip.selected {
+    border-color: #4CAF50;
+    background: #23331f;
+    box-shadow: 0 0 0 1px #4CAF50;
+  }
+  .swatch {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    padding: 0;
+    flex: 0 0 auto;
+    position: relative;
+    box-shadow: 0 0 0 1px #3a3a3a;
+  }
+  .swatch.selected {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 1px #4CAF50;
+  }
+  .toggleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1c1c1c;
+    border: 1px solid #3a3a3a;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #eee;
+  }
+  .toggleRow input[type=checkbox] {
+    width: 20px;
+    height: 20px;
+    accent-color: #4CAF50;
+  }
+  button:disabled {
+    opacity: 0.4;
+  }
+  .colorPickBtn {
+    flex: 1;
+    background: #2b2b2b;
+    color: #fff;
+    border: 1px solid #3a3a3a;
+    border-radius: 10px;
+    padding: 13px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .colorPickBtn input[type=color] {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+  }
+  input.txt { width:100%; background:#1c1c1c; color:#fff; border:1px solid #3a3a3a; border-radius:10px; padding:12px; font-size:14px; font-family:inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Relationship Cues — Pinterest Pin Maker</h1>
+
+  <div class="canvas-container" id="canvasContainer">
+    <canvas id="card" width="1080" height="1620"></canvas>
+    <div class="placeholder-btn" id="placeholderHint">Select an image below</div>
+    <div class="divider" id="divider"><div class="bar"></div></div>
+  </div>
+  <div class="hint">📌 Drag the image to reposition · use "Zoom" to crop tighter</div>
+
+  <div class="controls">
+    <div class="toggleRow">
+      <span>🔤 Full Text Card (no image)</span>
+      <input type="checkbox" id="fullTextToggle" />
+    </div>
+
+    <div class="row">
+      <button id="pickImageBtn">📷 Select Image</button>
+      <button id="saveBtn" class="primary">💾 Save Post</button>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" />
+
+    <label class="small">Font Style</label>
+    <div class="fontRow" id="fontRow"></div>
+
+    <label class="small">Colour Style</label>
+    <div class="swatchRow" id="swatchRow"></div>
+
+    <label class="small">🖍️ Tap-Word Colour <span style="font-weight:400;color:#666;">tap any word on the card</span></label>
+    <div class="swatchRow" id="tapColorRow"></div>
+    <div class="row">
+      <label class="colorPickBtn" for="tapColorPicker">🎨 Custom Colour
+        <input type="color" id="tapColorPicker" value="#E53935" />
+      </label>
+      <button id="clearTapColorsBtn">✖️ Clear Word Colours</button>
+    </div>
+
+    <div class="row" id="fullTextExtras" style="display:none;">
+      <button id="randomGradientBtn">🎨 Random Gradient</button>
+      <label class="colorPickBtn" for="bgColorPicker">🖌️ Pick Colour
+        <input type="color" id="bgColorPicker" value="#4CAF50" />
+      </label>
+    </div>
+
+    <div id="fullTextSliders" style="display:none; flex-direction:column; gap:10px;">
+      <label class="small">🌫️ Image Blur <span id="bgBlurVal">22</span>px
+        <input type="range" id="bgBlur" min="0" max="60" value="22" />
+      </label>
+      <label class="small">🎨 Text Background (readability) <span id="bgTintVal">55</span>%
+        <input type="range" id="bgTint" min="0" max="100" value="55" />
+      </label>
+    </div>
+
+    <label class="small">🔥 Click-Hook Ideas <span style="font-weight:400;color:#666;">tap to use</span></label>
+    <div class="fontRow" id="hookRow"></div>
+    <textarea id="factText" placeholder="Write a curiosity hook (4-9 words)..."></textarea>
+
+    <div class="toggleRow"><span>👆 Click Button (CTA)</span><input type="checkbox" id="ctaToggle" checked /></div>
+    <div id="ctaControls" style="display:flex; flex-direction:column; gap:10px;">
+      <div class="fontRow" id="ctaRow"></div>
+      <input type="text" id="blogUrl" class="txt" placeholder="yourblog.com (shown on pin — saved)" autocapitalize="none" />
+    </div>
+
+    <label class="small">Font Size <span id="fontSizeVal">84</span>px (auto-shrinks to fit)
+      <input type="range" id="fontSize" min="28" max="150" value="84" />
+    </label>
+
+    <div class="toggleRow">
+      <span>✏️ Text Outline</span>
+      <input type="checkbox" id="outlineToggle" />
+    </div>
+    <div id="outlineControls" style="display:none; flex-direction:column; gap:10px;">
+      <label class="small">Outline Thickness <span id="outlineWidthVal">8</span>px
+        <input type="range" id="outlineWidth" min="1" max="30" value="8" />
+      </label>
+      <div class="row">
+        <label class="colorPickBtn" for="outlineColorPicker">🖍️ Outline Colour
+          <input type="color" id="outlineColorPicker" value="#000000" />
+        </label>
+        <button id="outlineAutoBtn">✨ Auto Colour</button>
+      </div>
+    </div>
+
+    <label class="small">Image Zoom / Crop <span id="zoomVal">100</span>%
+      <input type="range" id="zoom" min="100" max="300" value="100" />
+    </label>
+
+    <label class="small">📌 Pin Title <span style="font-weight:400;color:#666;">sirf title — seedha paste karein</span></label>
+    <textarea id="seoTitle" readonly style="text-transform:none; min-height:60px; font-size:14px;"></textarea>
+    <button id="copyTitleBtn">📋 Copy Title</button>
+
+    <label class="small">📝 Pin Description <span style="font-weight:400;color:#666;">sirf description — seedha paste karein</span></label>
+    <textarea id="seoDesc" readonly style="text-transform:none; min-height:120px; font-size:14px;"></textarea>
+    <button id="copyDescBtn">📋 Copy Description</button>
+    <div class="hint">Saved image goes to your "Downloads" folder</div>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('card');
+  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('canvasContainer');
+  const divider = document.getElementById('divider');
+  const placeholderHint = document.getElementById('placeholderHint');
+  const factText = document.getElementById('factText');
+  const fontSizeInput = document.getElementById('fontSize');
+  const fontSizeVal = document.getElementById('fontSizeVal');
+  const zoomInput = document.getElementById('zoom');
+  const zoomVal = document.getElementById('zoomVal');
+  const fileInput = document.getElementById('fileInput');
+  const fullTextToggle = document.getElementById('fullTextToggle');
+  const pickImageBtn = document.getElementById('pickImageBtn');
+  const swatchRow = document.getElementById('swatchRow');
+  const fontRow = document.getElementById('fontRow');
+  const fullTextExtras = document.getElementById('fullTextExtras');
+  const fullTextSliders = document.getElementById('fullTextSliders');
+  const outlineToggle = document.getElementById('outlineToggle');
+  const outlineControls = document.getElementById('outlineControls');
+  const outlineWidthInput = document.getElementById('outlineWidth');
+  const outlineWidthVal = document.getElementById('outlineWidthVal');
+  const outlineColorPicker = document.getElementById('outlineColorPicker');
+  const outlineAutoBtn = document.getElementById('outlineAutoBtn');
+  const bgBlurInput = document.getElementById('bgBlur');
+  const bgBlurVal = document.getElementById('bgBlurVal');
+  const bgTintInput = document.getElementById('bgTint');
+  const bgTintVal = document.getElementById('bgTintVal');
+  const randomGradientBtn = document.getElementById('randomGradientBtn');
+  const bgColorPicker = document.getElementById('bgColorPicker');
+  const tapColorRow = document.getElementById('tapColorRow');
+  const tapColorPicker = document.getElementById('tapColorPicker');
+  const clearTapColorsBtn = document.getElementById('clearTapColorsBtn');
+
+  // Canvas is 4:5 (width:height) — TEXT area on TOP, IMAGE area on BOTTOM
+  const SIZE_W = 1080;
+  const SIZE_H = 1620; // 2:3 = Pinterest's best-performing pin ratio
+  const WATERMARK_TEXT = 'RELATIONSHIP CUES';
+
+  // Pinterest-style card text ke liye sabse popular aur readable fonts —
+  // bold, clean, big-impact fonts jo chhoti screen par bhi clearly padhe jaate hain.
+  const FONT_OPTIONS = [
+    { id: 'anton',        name: 'Anton',           stack: '"Anton", Arial, sans-serif',            weight: 400 },
+    { id: 'bebas',        name: 'Bebas Neue',      stack: '"Bebas Neue", Arial, sans-serif',        weight: 400 },
+    { id: 'montserrat',   name: 'Montserrat',      stack: '"Montserrat", Arial, sans-serif',        weight: 800 },
+    { id: 'poppins',      name: 'Poppins',         stack: '"Poppins", Arial, sans-serif',           weight: 700 },
+    { id: 'oswald',       name: 'Oswald',          stack: '"Oswald", Arial, sans-serif',             weight: 600 },
+    { id: 'leaguespartan',name: 'League Spartan',  stack: '"League Spartan", Arial, sans-serif',    weight: 700 },
+    { id: 'archivoblack', name: 'Archivo Black',   stack: '"Archivo Black", Arial, sans-serif',     weight: 400 },
+    { id: 'raleway',      name: 'Raleway',         stack: '"Raleway", Arial, sans-serif',            weight: 800 },
+    { id: 'dmsans',       name: 'DM Sans',         stack: '"DM Sans", Arial, sans-serif',            weight: 700 },
+    { id: 'nunito',       name: 'Nunito',          stack: '"Nunito", Arial, sans-serif',             weight: 800 },
+    { id: 'playfair',     name: 'Playfair Display',stack: '"Playfair Display", Georgia, serif',      weight: 700 },
+    { id: 'lora',         name: 'Lora',            stack: '"Lora", Georgia, serif',                  weight: 600 },
+    { id: 'baskerville',  name: 'Libre Baskerville',stack: '"Libre Baskerville", Georgia, serif',    weight: 700 },
+    { id: 'caveat',       name: 'Caveat',          stack: '"Caveat", cursive',                       weight: 700 },
+    { id: 'pacifico',     name: 'Pacifico',        stack: '"Pacifico", cursive',                     weight: 400 },
+  ];
+
+  // Selectable text/background colour combinations. `highlight` is the colour
+  // a tapped word turns — chosen per combo so it still stands out.
+  const COMBOS = [
+    { bg: '#FFFFFF', text: '#000000', highlight: '#E53935', name: 'White' },
+    { bg: '#000000', text: '#FFFFFF', highlight: '#FFD54F', name: 'Black' },
+    { bg: '#F5D400', text: '#000000', highlight: '#D32F2F', name: 'Yellow' },
+    { bg: '#D32F2F', text: '#FFFFFF', highlight: '#FFEB3B', name: 'Red' },
+    { bg: '#1B5E20', text: '#FFFFFF', highlight: '#FFD54F', name: 'Green' },
+    { bg: '#0D1B4C', text: '#FFFFFF', highlight: '#FFD54F', name: 'Navy' },
+    { bg: '#F8BBD0', text: '#000000', highlight: '#AD1457', name: 'Pink' },
+    { bg: '#4A148C', text: '#FFFFFF', highlight: '#FFEB3B', name: 'Purple' },
+    { bg: '#FB8C00', text: '#000000', highlight: '#FFFFFF', name: 'Orange' },
+    { bg: '#00695C', text: '#FFFFFF', highlight: '#FFD54F', name: 'Teal' },
+    { bg: '#5D1049', text: '#FFFFFF', highlight: '#FFD54F', name: 'Maroon' },
+    { bg: '#C8E6C9', text: '#000000', highlight: '#2E7D32', name: 'Mint' },
+    { bg: '#81D4FA', text: '#000000', highlight: '#0D47A1', name: 'Sky Blue' },
+    { bg: '#2C2C2C', text: '#FFFFFF', highlight: '#FF7043', name: 'Charcoal' },
+  ];
+
+  // Palette of colours the user can pick from before tapping a word on the
+  // card — the selected one is what a tapped word turns.
+  const TAP_PALETTE = [
+    '#E53935', '#FF7043', '#FB8C00', '#F5D400', '#FFD54F',
+    '#4CAF50', '#00BFA5', '#00B8D4', '#2196F3', '#3F51B5',
+    '#8E24AA', '#D81B60', '#FFFFFF', '#000000',
+  ];
+
+  let state = {
+    image: null,
+    fullText: false, // when true, no image is needed and text fills the whole card
+    outline: false,   // text outline on/off
+    outlineWidth: 8,  // outline thickness in px
+    outlineColor: null, // null = auto (opposite of text colour), else hex
+    bgBlur: 22,       // Full Text mode: blur (px) applied to the background photo
+    bgTint: 0.55,     // Full Text mode: opacity of the colour layer between photo and text
+    comboIndex: 2,    // which COMBOS entry is active
+    font: FONT_OPTIONS[0], // currently selected text font
+    customBg: null,   // { bgColors: [hex] or [hex,hex], text, highlight } — Full Text mode only
+    textRatio: 0.42,   // fraction of height given to the TEXT area (top)
+    fontSize: 84,
+    ctaOn: true, ctaText: "READ FULL ARTICLE →", blogUrl: "",
+    text: factText.value,
+    zoom: 1,          // 1 = fully fit, higher = zoomed in / more cropped
+    centerX: null,    // center point of the crop window, in source-image pixels
+    centerY: null,
+    cropW: null,
+    cropH: null,
+    tapColor: TAP_PALETTE[0],  // colour that gets applied when a word is tapped
+    wordColors: {},   // { wordIdx: hexColor } — per-word colour overrides from tapping
+    wordHitboxes: [],  // rebuilt every drawCard(): [{idx, x1, y1, x2, y2}]
+    splitY: 0
+  };
+
+  // Returns { bgColors: [hex] or [hex,hex], text, highlight }. In Full Text
+  // mode a custom (gradient or manually picked) background takes priority.
+  function currentCombo() {
+    if (state.fullText && state.customBg) return state.customBg;
+    const preset = COMBOS[state.comboIndex];
+    return { bgColors: [preset.bg], text: preset.text, highlight: preset.highlight };
+  }
+
+  function luminance(hex) {
+    const c = hex.replace('#', '');
+    const r = parseInt(c.substring(0, 2), 16);
+    const g = parseInt(c.substring(2, 4), 16);
+    const b = parseInt(c.substring(4, 6), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  }
+  function isLightColor(hex) { return luminance(hex) > 0.6; }
+  function avgIsLight(colors) {
+    return (colors.reduce((s, c) => s + luminance(c), 0) / colors.length) > 0.6;
+  }
+
+  function hexToRgba(hex, alpha) {
+    const c = hex.replace('#', '');
+    const r = parseInt(c.substring(0, 2), 16);
+    const g = parseInt(c.substring(2, 4), 16);
+    const b = parseInt(c.substring(4, 6), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  // Builds a solid or (2-colour) gradient fillStyle from a bgColors array.
+  function bgFillStyle(colors, alpha) {
+    if (alpha === undefined) alpha = 1;
+    if (colors.length === 1) return hexToRgba(colors[0], alpha);
+    const grad = ctx.createLinearGradient(0, 0, SIZE_W, SIZE_H);
+    grad.addColorStop(0, hexToRgba(colors[0], alpha));
+    grad.addColorStop(1, hexToRgba(colors[1], alpha));
+    return grad;
+  }
+
+  // Auto-picks readable text/highlight colours for a custom background.
+  function contrastFor(colors) {
+    const dark = !avgIsLight(colors);
+    return { text: dark ? '#FFFFFF' : '#000000', highlight: dark ? '#FFD54F' : '#D32F2F' };
+  }
+
+  function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const k = n => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    const toHex = x => Math.round(255 * x).toString(16).padStart(2, '0');
+    return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+  }
+
+  // A fresh, reasonably pleasant random 2-colour gradient each time it's called.
+  function randomGradientColors() {
+    const h1 = Math.floor(Math.random() * 360);
+    const h2 = (h1 + 40 + Math.floor(Math.random() * 120)) % 360;
+    const s = 65 + Math.floor(Math.random() * 20);
+    const l = 42 + Math.floor(Math.random() * 16);
+    return [hslToHex(h1, s, l), hslToHex(h2, s, l)];
+  }
+
+  function buildFontRow() {
+    fontRow.innerHTML = '';
+    FONT_OPTIONS.forEach((f) => {
+      const btn = document.createElement('button');
+      btn.className = 'fontChip' + (f.id === state.font.id ? ' selected' : '');
+      btn.style.fontFamily = f.stack;
+      btn.style.fontWeight = f.weight;
+      btn.textContent = f.name;
+      btn.addEventListener('click', () => {
+        state.font = f;
+        buildFontRow();
+        drawCard();
+      });
+      fontRow.appendChild(btn);
+    });
+  }
+  buildFontRow();
+
+  function buildSwatches() {
+    swatchRow.innerHTML = '';
+    COMBOS.forEach((combo, i) => {
+      const btn = document.createElement('button');
+      const usingCustom = state.fullText && state.customBg;
+      btn.className = 'swatch' + (!usingCustom && i === state.comboIndex ? ' selected' : '');
+      btn.style.background = combo.bg;
+      btn.title = combo.name;
+      btn.addEventListener('click', () => {
+        state.comboIndex = i;
+        state.customBg = null; // preset overrides any gradient/manual colour
+        buildSwatches();
+        drawCard();
+      });
+      swatchRow.appendChild(btn);
+    });
+  }
+  buildSwatches();
+
+  function buildTapColorRow() {
+    tapColorRow.innerHTML = '';
+    TAP_PALETTE.forEach((color) => {
+      const btn = document.createElement('button');
+      btn.className = 'swatch' + (color.toLowerCase() === state.tapColor.toLowerCase() ? ' selected' : '');
+      btn.style.background = color;
+      btn.title = color;
+      btn.addEventListener('click', () => {
+        state.tapColor = color;
+        buildTapColorRow();
+      });
+      tapColorRow.appendChild(btn);
+    });
+  }
+  buildTapColorRow();
+
+  function layoutLines(wordObjs, maxWidth) {
+    const spaceWidth = ctx.measureText(' ').width;
+    const lines = [];
+    let currentLine = [];
+    let currentWidth = 0;
+    wordObjs.forEach((w) => {
+      const addWidth = currentLine.length ? spaceWidth + w.width : w.width;
+      if (currentWidth + addWidth > maxWidth && currentLine.length) {
+        lines.push(currentLine);
+        currentLine = [w];
+        currentWidth = w.width;
+      } else {
+        currentLine.push(w);
+        currentWidth += addWidth;
+      }
+    });
+    if (currentLine.length) lines.push(currentLine);
+    return lines;
+  }
+
+  // Draws `img` blurred, covering the whole card (used as a Full Text mode
+  // background). Drawn slightly oversized so blur edge softening stays off-canvas.
+  function drawFullTextBackgroundImage(img, blurPx) {
+    const margin = 40;
+    const targetW = SIZE_W + margin * 2;
+    const targetH = SIZE_H + margin * 2;
+    const targetRatio = targetW / targetH;
+    const imgRatio = img.width / img.height;
+    let baseW, baseH;
+    if (imgRatio > targetRatio) { baseH = img.height; baseW = baseH * targetRatio; }
+    else { baseW = img.width; baseH = baseW / targetRatio; }
+    const cropX = (img.width - baseW) / 2;
+    const cropY = (img.height - baseH) / 2;
+    ctx.save();
+    ctx.filter = `blur(${blurPx}px)`;
+    ctx.drawImage(img, cropX, cropY, baseW, baseH, -margin, -margin, targetW, targetH);
+    ctx.restore();
+  }
+
+  function drawCard() {
+    ctx.clearRect(0, 0, SIZE_W, SIZE_H);
+    const combo = currentCombo();
+    const splitY = state.fullText ? SIZE_H : Math.round(SIZE_H * state.textRatio);
+    state.splitY = splitY;
+
+    // ---- BACKGROUND — full canvas in Full Text mode, top area otherwise ----
+    if (state.fullText && state.image) {
+      // Blurred photo behind the text, tinted with the chosen colour so text stays readable
+      drawFullTextBackgroundImage(state.image, state.bgBlur);
+      ctx.fillStyle = bgFillStyle(combo.bgColors, state.bgTint);
+      ctx.fillRect(0, 0, SIZE_W, SIZE_H);
+    } else {
+      ctx.fillStyle = bgFillStyle(combo.bgColors);
+      ctx.fillRect(0, 0, SIZE_W, splitY);
+    }
+
+    const ctaReserve = state.ctaOn ? 280 : 100;
+    const textAreaH = state.fullText ? SIZE_H - ctaReserve : splitY;
+    const paddingX = 60;
+    const maxWidth = SIZE_W - paddingX * 2;
+    ctx.textBaseline = 'middle';
+    const paragraphs = (state.text || '').split(/\n/);
+    const availH = textAreaH - 70;
+    let fs = state.fontSize, lines, lineHeight, totalTextHeight;
+    for (;;) { // shrink font until the hook fits its area
+      ctx.font = `${state.font.weight} ${fs}px ${state.font.stack}`;
+      let gi = 0; lines = [];
+      paragraphs.forEach(para => {
+        const pw = para.toUpperCase().split(/\s+/).filter(Boolean);
+        if (!pw.length) { lines.push([]); return; }
+        const objs = pw.map(word => ({ word, idx: gi++, width: ctx.measureText(word).width }));
+        layoutLines(objs, maxWidth).forEach(l => lines.push(l));
+      });
+      lineHeight = fs * 1.18;
+      totalTextHeight = lines.length * lineHeight;
+      const tooWide = lines.some(l => l.length === 1 && l[0].width > maxWidth);
+      if ((totalTextHeight <= availH && !tooWide) || fs <= 24) break;
+      fs -= 2;
+    }
+    const spaceWidth = ctx.measureText(' ').width;
+    const lineYs = [];
+    let cursorY = textAreaH / 2 - totalTextHeight / 2;
+    lines.forEach(() => { cursorY += lineHeight / 2; lineYs.push(cursorY); cursorY += lineHeight / 2; });
+
+    ctx.textAlign = 'left';
+    state.wordHitboxes = [];
+    lines.forEach((lineWords, i) => {
+      const lineWidth = lineWords.reduce((sum, w) => sum + w.width, 0) + spaceWidth * (lineWords.length - 1);
+      let x = SIZE_W / 2 - lineWidth / 2;
+      const y = lineYs[i];
+      lineWords.forEach(w => {
+        const wordColor = state.wordColors[w.idx] || combo.text;
+        if (state.outline && state.outlineWidth > 0) {
+          ctx.save();
+          ctx.lineJoin = 'round';
+          ctx.miterLimit = 2;
+          ctx.lineWidth = state.outlineWidth * 2; // half is hidden under the fill
+          ctx.strokeStyle = state.outlineColor || (luminance(wordColor) > 0.5 ? '#000000' : '#FFFFFF');
+          ctx.strokeText(w.word, x, y);
+          ctx.restore();
+        }
+        ctx.fillStyle = wordColor;
+        ctx.fillText(w.word, x, y);
+        state.wordHitboxes.push({
+          idx: w.idx,
+          x1: x, y1: y - lineHeight / 2,
+          x2: x + w.width, y2: y + lineHeight / 2
+        });
+        x += w.width + spaceWidth;
+      });
+    });
+
+    // ---- IMAGE AREA (bottom) — skipped entirely in Full Text mode ----
+    if (!state.fullText) {
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, splitY, SIZE_W, SIZE_H - splitY);
+
+    if (state.image) {
+      const img = state.image;
+      const targetW = SIZE_W, targetH = SIZE_H - splitY;
+      const targetRatio = targetW / targetH;
+      const imgRatio = img.width / img.height;
+
+      let baseW, baseH;
+      if (imgRatio > targetRatio) { baseH = img.height; baseW = baseH * targetRatio; }
+      else { baseW = img.width; baseH = baseW / targetRatio; }
+
+      const cropW = baseW / state.zoom;
+      const cropH = baseH / state.zoom;
+
+      state.centerX = Math.max(cropW / 2, Math.min(state.centerX, img.width - cropW / 2));
+      state.centerY = Math.max(cropH / 2, Math.min(state.centerY, img.height - cropH / 2));
+
+      const cropX = state.centerX - cropW / 2;
+      const cropY = state.centerY - cropH / 2;
+
+      state.cropW = cropW;
+      state.cropH = cropH;
+
+      ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, splitY, targetW, targetH);
+    }
+    } // end image-area (!state.fullText)
+
+    // ---- BRAND + CTA BUTTON (click magnet) ----
+    const onLight = state.fullText && avgIsLight(combo.bgColors);
+    ctx.save();
+    if (!state.fullText) {
+      const scrimH = 340;
+      const g = ctx.createLinearGradient(0, SIZE_H - scrimH, 0, SIZE_H);
+      g.addColorStop(0, 'rgba(0,0,0,0)');
+      g.addColorStop(1, 'rgba(0,0,0,0.68)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, SIZE_H - scrimH, SIZE_W, scrimH);
+    }
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = '700 24px "Poppins", Arial, sans-serif';
+    ctx.letterSpacing = '3px';
+    ctx.fillStyle = onLight ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.96)';
+    ctx.fillText(WATERMARK_TEXT + (state.blogUrl ? '  •  ' + state.blogUrl.toUpperCase() : ''), SIZE_W / 2, SIZE_H - 48);
+    ctx.letterSpacing = '0px';
+    if (state.ctaOn && state.ctaText) {
+      ctx.font = '800 44px "Poppins", Arial, sans-serif';
+      const tw = ctx.measureText(state.ctaText).width;
+      const bw = Math.min(SIZE_W - 80, tw + 110), bh = 104;
+      const bx = (SIZE_W - bw) / 2, by = SIZE_H - 48 - 42 - bh;
+      ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 20; ctx.shadowOffsetY = 6;
+      ctx.fillStyle = '#E60023';
+      ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, bh / 2); ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(state.ctaText, SIZE_W / 2, by + bh / 2 + 3);
+    }
+    ctx.restore();
+
+    const displayRatio = container.clientHeight / SIZE_H;
+    divider.style.display = state.fullText ? 'none' : 'flex';
+    divider.style.top = (splitY * displayRatio) + 'px';
+    placeholderHint.style.top = (splitY * displayRatio) + 'px';
+    placeholderHint.style.height = ((SIZE_H - splitY) * displayRatio) + 'px';
+    placeholderHint.style.display = (state.image || state.fullText) ? 'none' : 'flex';
+  }
+
+  // Converts a pointer event's client coords into canvas-pixel coords
+  // (the 1080x1350 space drawCard() works in), regardless of on-screen scale.
+  function canvasPointFromEvent(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) * (SIZE_W / rect.width),
+      y: (e.clientY - rect.top) * (SIZE_H / rect.height)
+    };
+  }
+
+  function wordAtCanvasPoint(pt) {
+    const pad = 6; // small tolerance so tapping near a word's edge still hits it
+    for (const box of state.wordHitboxes) {
+      if (pt.x >= box.x1 - pad && pt.x <= box.x2 + pad &&
+          pt.y >= box.y1 - pad && pt.y <= box.y2 + pad) {
+        return box.idx;
+      }
+    }
+    return null;
+  }
+
+  let dragging = false;
+  function ratioFromClientY(clientY) {
+    const rect = container.getBoundingClientRect();
+    let ratio = (clientY - rect.top) / rect.height;
+    return Math.max(0.15, Math.min(0.6, ratio));
+  }
+  divider.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    divider.setPointerCapture(e.pointerId);
+  });
+  divider.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    state.textRatio = ratioFromClientY(e.clientY);
+    drawCard();
+  });
+  divider.addEventListener('pointerup', () => { dragging = false; });
+  divider.addEventListener('pointercancel', () => { dragging = false; });
+
+  // ---- Move/reposition the image by dragging it (image area is BOTTOM) ----
+  // ---- OR tap a word in the text area to recolour it ----
+  let imgDragging = false;
+  let lastX = 0, lastY = 0;
+  let tapCandidate = null; // { startClientX, startClientY, canvasPt }
+  const TAP_MOVE_TOLERANCE = 10; // px on screen — beyond this it's a drag, not a tap
+
+  canvas.addEventListener('pointerdown', (e) => {
+    const pt = canvasPointFromEvent(e);
+    const inImageArea = !state.fullText && state.image && pt.y >= state.splitY;
+
+    if (inImageArea) {
+      imgDragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+    } else {
+      tapCandidate = { startClientX: e.clientX, startClientY: e.clientY, canvasPt: pt };
+      canvas.setPointerCapture(e.pointerId);
+    }
+  });
+
+  canvas.addEventListener('pointermove', (e) => {
+    if (imgDragging && state.image) {
+      const rect = container.getBoundingClientRect();
+      const dxDisplay = e.clientX - lastX;
+      const dyDisplay = e.clientY - lastY;
+      lastX = e.clientX;
+      lastY = e.clientY;
+
+      const displayImageHeight = rect.height * (1 - state.textRatio);
+      const scaleFactorX = state.cropW / rect.width;
+      const scaleFactorY = state.cropH / displayImageHeight;
+
+      state.centerX -= dxDisplay * scaleFactorX;
+      state.centerY -= dyDisplay * scaleFactorY;
+
+      drawCard();
+    } else if (tapCandidate) {
+      const movedX = Math.abs(e.clientX - tapCandidate.startClientX);
+      const movedY = Math.abs(e.clientY - tapCandidate.startClientY);
+      if (movedX > TAP_MOVE_TOLERANCE || movedY > TAP_MOVE_TOLERANCE) {
+        tapCandidate = null; // moved too much — treat as a scroll/drag, not a tap
+      }
+    }
+  });
+
+  canvas.addEventListener('pointerup', (e) => {
+    if (tapCandidate) {
+      const idx = wordAtCanvasPoint(tapCandidate.canvasPt);
+      if (idx !== null) {
+        if (state.wordColors[idx] === state.tapColor) {
+          delete state.wordColors[idx]; // tapping the same colour again clears it
+        } else {
+          state.wordColors[idx] = state.tapColor;
+        }
+        drawCard();
+      }
+    }
+    imgDragging = false;
+    tapCandidate = null;
+    try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+  });
+
+  canvas.addEventListener('pointercancel', () => {
+    imgDragging = false;
+    tapCandidate = null;
+  });
+
+  pickImageBtn.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fullTextToggle.addEventListener('change', () => {
+    state.fullText = fullTextToggle.checked;
+    fullTextExtras.style.display = state.fullText ? 'flex' : 'none';
+    fullTextSliders.style.display = state.fullText ? 'flex' : 'none';
+    drawCard();
+  });
+
+  bgBlurInput.addEventListener('input', () => {
+    state.bgBlur = parseInt(bgBlurInput.value, 10);
+    bgBlurVal.textContent = state.bgBlur;
+    drawCard();
+  });
+  bgTintInput.addEventListener('input', () => {
+    state.bgTint = parseInt(bgTintInput.value, 10) / 100;
+    bgTintVal.textContent = bgTintInput.value;
+    drawCard();
+  });
+
+  randomGradientBtn.addEventListener('click', () => {
+    const [c1, c2] = randomGradientColors();
+    const contrast = contrastFor([c1, c2]);
+    state.customBg = { bgColors: [c1, c2], text: contrast.text, highlight: contrast.highlight };
+    buildSwatches();
+    drawCard();
+  });
+
+  bgColorPicker.addEventListener('input', () => {
+    const c = bgColorPicker.value;
+    const contrast = contrastFor([c]);
+    state.customBg = { bgColors: [c], text: contrast.text, highlight: contrast.highlight };
+    buildSwatches();
+    drawCard();
+  });
+
+  tapColorPicker.addEventListener('input', () => {
+    state.tapColor = tapColorPicker.value;
+    buildTapColorRow();
+  });
+
+  clearTapColorsBtn.addEventListener('click', () => {
+    state.wordColors = {};
+    drawCard();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        state.image = img;
+        state.zoom = 1;
+        state.centerX = img.width / 2;
+        state.centerY = img.height / 2;
+        zoomInput.value = 100;
+        zoomVal.textContent = 100;
+        drawCard();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  factText.addEventListener('input', () => {
+    state.text = factText.value;
+    state.wordColors = {}; // word positions shift with new text, so old taps no longer apply
+    drawCard();
+  });
+  outlineToggle.addEventListener('change', () => {
+    state.outline = outlineToggle.checked;
+    outlineControls.style.display = state.outline ? 'flex' : 'none';
+    drawCard();
+  });
+  outlineWidthInput.addEventListener('input', () => {
+    state.outlineWidth = parseInt(outlineWidthInput.value, 10);
+    outlineWidthVal.textContent = state.outlineWidth;
+    drawCard();
+  });
+  outlineColorPicker.addEventListener('input', () => {
+    state.outlineColor = outlineColorPicker.value;
+    drawCard();
+  });
+  outlineAutoBtn.addEventListener('click', () => {
+    state.outlineColor = null;
+    drawCard();
+  });
+
+  fontSizeInput.addEventListener('input', () => {
+    state.fontSize = parseInt(fontSizeInput.value, 10);
+    fontSizeVal.textContent = state.fontSize;
+    drawCard();
+  });
+  zoomInput.addEventListener('input', () => {
+    state.zoom = parseInt(zoomInput.value, 10) / 100;
+    zoomVal.textContent = zoomInput.value;
+    drawCard();
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'RelationshipCues_' + ((state.text || 'pin').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'pin') + '_' + Date.now() + '.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }, 'image/png');
+  });
+
+  // ---- Pinterest click boosters: hooks, CTA, SEO text ----
+  const HOOKS = [
+    "7 SIGNS HE IS EMOTIONALLY UNAVAILABLE", "STOP DOING THIS IN YOUR RELATIONSHIP",
+    "WHY HE PULLS AWAY WHEN YOU GET CLOSE", "5 SIGNS SHE IS LOSING INTEREST",
+    "THE TEXT THAT MAKES HIM CHASE YOU", "6 RED FLAGS YOU SHOULD NEVER IGNORE",
+    "WHAT HIS SILENCE REALLY MEANS", "HE WON'T SAY IT, BUT THESE SIGNS SHOW IT"
+  ];
+  const CTAS = ["READ FULL ARTICLE →", "TAP TO READ MORE →", "GET THE FULL GUIDE →", "CLICK TO READ →", "READ THIS NEXT →"];
+  const hookRow = document.getElementById('hookRow'), ctaRow = document.getElementById('ctaRow');
+  const ctaToggle = document.getElementById('ctaToggle'), ctaControls = document.getElementById('ctaControls');
+  const blogUrlInput = document.getElementById('blogUrl'), seoTitle = document.getElementById('seoTitle'), seoDesc = document.getElementById('seoDesc');
+
+  function titleCase(t) { return t.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()); }
+  function updateSeo() {
+    const hook = (state.text || '').replace(/\s+/g, ' ').trim();
+    if (!hook) { seoTitle.value = ''; seoDesc.value = ''; return; }
+    seoTitle.value = titleCase(hook).slice(0, 100);
+    const link = state.blogUrl ? '\n\n👉 ' + state.blogUrl : '';
+    seoDesc.value = hook.charAt(0) + hook.slice(1).toLowerCase() +
+      '... Tap to read the full article on Relationship Cues.' + link +
+      '\n\n#relationshipadvice #relationshiptips #healthyrelationships #relationshipgoals #couplegoals #datingadvice';
+  }
+  function setText(t) {
+    factText.value = t; state.text = t; state.wordColors = {};
+    drawCard(); updateSeo();
+  }
+  HOOKS.forEach(h => {
+    const b = document.createElement('button');
+    b.className = 'fontChip'; b.textContent = h;
+    b.addEventListener('click', () => setText(h));
+    hookRow.appendChild(b);
+  });
+  function buildCtaRow() {
+    ctaRow.innerHTML = '';
+    CTAS.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'fontChip' + (c === state.ctaText ? ' selected' : '');
+      b.textContent = c;
+      b.addEventListener('click', () => { state.ctaText = c; buildCtaRow(); drawCard(); });
+      ctaRow.appendChild(b);
+    });
+  }
+  buildCtaRow();
+  ctaToggle.addEventListener('change', () => {
+    state.ctaOn = ctaToggle.checked;
+    ctaControls.style.display = state.ctaOn ? 'flex' : 'none';
+    drawCard();
+  });
+  try { state.blogUrl = localStorage.getItem('rc_blogUrl') || ''; blogUrlInput.value = state.blogUrl; } catch (e) {}
+  blogUrlInput.addEventListener('input', () => {
+    state.blogUrl = blogUrlInput.value.trim();
+    try { localStorage.setItem('rc_blogUrl', state.blogUrl); } catch (e) {}
+    drawCard(); updateSeo();
+  });
+  factText.addEventListener('input', updateSeo);
+  function copyFrom(el, btn, label) {
+    el.select();
+    const done = () => { btn.textContent = '✅ Copied!'; setTimeout(() => btn.textContent = label, 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(el.value).then(done).catch(() => { document.execCommand('copy'); done(); });
+    else { document.execCommand('copy'); done(); }
+  }
+  const copyTitleBtn = document.getElementById('copyTitleBtn'), copyDescBtn = document.getElementById('copyDescBtn');
+  copyTitleBtn.addEventListener('click', () => copyFrom(seoTitle, copyTitleBtn, '📋 Copy Title'));
+  copyDescBtn.addEventListener('click', () => copyFrom(seoDesc, copyDescBtn, '📋 Copy Description'));
+  setText(HOOKS[0]);
+
+  window.addEventListener('resize', drawCard);
+  window.addEventListener('load', drawCard);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(drawCard);
+  }
+  drawCard();
+</script>
+</body>
+</html>
