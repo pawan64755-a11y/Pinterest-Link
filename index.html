@@ -286,8 +286,6 @@
       </label>
     </div>
 
-    <label class="small">🔥 Click-Hook Ideas <span style="font-weight:400;color:#666;">tap to use</span></label>
-    <div class="fontRow" id="hookRow"></div>
     <textarea id="factText" placeholder="Write a curiosity hook (4-9 words)..."></textarea>
 
     <div class="toggleRow"><span>👆 Click Button (CTA)</span><input type="checkbox" id="ctaToggle" checked /></div>
@@ -425,7 +423,7 @@
     outlineColor: null, // null = auto (opposite of text colour), else hex
     bgBlur: 22,       // Full Text mode: blur (px) applied to the background photo
     bgTint: 0.55,     // Full Text mode: opacity of the colour layer between photo and text
-    comboIndex: 2,    // which COMBOS entry is active
+    comboIndex: 0,    // which COMBOS entry is active (0 = White)
     font: FONT_OPTIONS[0], // currently selected text font
     customBg: null,   // { bgColors: [hex] or [hex,hex], text, highlight } — Full Text mode only
     textRatio: 0.42,   // fraction of height given to the TEXT area (top)
@@ -967,14 +965,8 @@
   });
 
   // ---- Pinterest click boosters: hooks, CTA, SEO text ----
-  const HOOKS = [
-    "7 SIGNS HE IS EMOTIONALLY UNAVAILABLE", "STOP DOING THIS IN YOUR RELATIONSHIP",
-    "WHY HE PULLS AWAY WHEN YOU GET CLOSE", "5 SIGNS SHE IS LOSING INTEREST",
-    "THE TEXT THAT MAKES HIM CHASE YOU", "6 RED FLAGS YOU SHOULD NEVER IGNORE",
-    "WHAT HIS SILENCE REALLY MEANS", "HE WON'T SAY IT, BUT THESE SIGNS SHOW IT"
-  ];
   const CTAS = ["READ FULL ARTICLE →", "TAP TO READ MORE →", "GET THE FULL GUIDE →", "CLICK TO READ →", "READ THIS NEXT →"];
-  const hookRow = document.getElementById('hookRow'), ctaRow = document.getElementById('ctaRow');
+  const ctaRow = document.getElementById('ctaRow');
   const ctaToggle = document.getElementById('ctaToggle'), ctaControls = document.getElementById('ctaControls');
   const blogUrlInput = document.getElementById('blogUrl'), seoTitle = document.getElementById('seoTitle'), seoDesc = document.getElementById('seoDesc');
 
@@ -988,16 +980,6 @@
       '... Tap to read the full article on Relationship Cues.' + link +
       '\n\n#relationshipadvice #relationshiptips #healthyrelationships #relationshipgoals #couplegoals #datingadvice';
   }
-  function setText(t) {
-    factText.value = t; state.text = t; state.wordColors = {};
-    drawCard(); updateSeo();
-  }
-  HOOKS.forEach(h => {
-    const b = document.createElement('button');
-    b.className = 'fontChip'; b.textContent = h;
-    b.addEventListener('click', () => setText(h));
-    hookRow.appendChild(b);
-  });
   function buildCtaRow() {
     ctaRow.innerHTML = '';
     CTAS.forEach(c => {
@@ -1030,7 +1012,7 @@
   const copyTitleBtn = document.getElementById('copyTitleBtn'), copyDescBtn = document.getElementById('copyDescBtn');
   copyTitleBtn.addEventListener('click', () => copyFrom(seoTitle, copyTitleBtn, '📋 Copy Title'));
   copyDescBtn.addEventListener('click', () => copyFrom(seoDesc, copyDescBtn, '📋 Copy Description'));
-  setText(HOOKS[0]);
+  updateSeo();
 
   window.addEventListener('resize', drawCard);
   window.addEventListener('load', drawCard);
