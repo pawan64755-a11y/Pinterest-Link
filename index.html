@@ -244,6 +244,10 @@
   <div class="hint">📌 Drag the image to reposition · use "Zoom" to crop tighter</div>
 
   <div class="controls">
+    <label class="small">Font Size <span id="fontSizeVal">84</span>px (auto-shrinks to fit)
+      <input type="range" id="fontSize" min="28" max="150" value="84" />
+    </label>
+
     <div class="toggleRow">
       <span>🔤 Full Text Card (no image)</span>
       <input type="checkbox" id="fullTextToggle" />
@@ -293,10 +297,6 @@
       <div class="fontRow" id="ctaRow"></div>
       <input type="text" id="blogUrl" class="txt" placeholder="yourblog.com (shown on pin — saved)" autocapitalize="none" />
     </div>
-
-    <label class="small">Font Size <span id="fontSizeVal">84</span>px (auto-shrinks to fit)
-      <input type="range" id="fontSize" min="28" max="150" value="84" />
-    </label>
 
     <div class="toggleRow">
       <span>✏️ Text Outline</span>
